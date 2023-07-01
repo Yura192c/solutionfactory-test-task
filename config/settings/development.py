@@ -19,4 +19,4 @@ DATABASES = {
 }
 
 API_SENDING_URL = 'https://probe.fbrq.cloud/v1/send/'
-API_JWT_TOKEN = os.environ['API_JWT_TOKEN']
+API_JWT_TOKEN = os.environ.get('API_JWT_TOKEN', 'API_JWT_TOKEN')

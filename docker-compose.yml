@@ -1,0 +1,69 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    volumes:
+      - .:/code
+    depends_on:
+      - rabbitmq
+#      - celery-worker
+#      - flower
+      - db
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=solutionfactory
+      - POSTGRES_PASSWORD=solutionfactory
+      - POSTGRES_DB=solutionfactory
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  rabbitmq:
+    restart: always
+    image: rabbitmq:management
+    environment:
+      RABBITMQ_NODENAME: "rabbit@localhost"
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - 15672:15672
+      - 5672:5672
+  celery-worker:
+    restart: always
+    build: .
+    working_dir: /code
+    volumes:
+      - .:/code
+    ports:
+      - "5555:5555"
+    command: sh -c "sleep 30 && celery -A config worker -l info"
+#    environment:
+#      - CELERY_BROKER_URL = 'amqp://rabbitmq:rabbitmq@rabbit:5672'
+#    command: bash -c "
+#      rm -rf /tmp/celery*.pid &
+#      python -m celery multi start --app=config  &&
+#      python -m celery -A config worker -l info "
+#      python -m celery flower -A config --conf=/app/{APP}/settings/flowerconfig.py --address=0.0.0.0"
+    links:
+      - rabbitmq
+    depends_on:
+      - web
+      - rabbitmq
+#  flower:
+#    build: .
+#    command: sh -c "sleep 60 && celery -A config.celery flower --address=0.0.0.0 --port=5555 --loglevel=info --hostname=localhost"
+#    ports:
+#      - 5555:5555
+#    volumes:
+#      - .:/code
+#    depends_on:
+#      - rabbitmq
+
+volumes:
+  postgres_data:
