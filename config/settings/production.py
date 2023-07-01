@@ -1,6 +1,6 @@
 from .base import *
 
-print('production.py')
+print('production')
 SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = False
 
