@@ -10,6 +10,8 @@ drf-yasg = "*"
 celery = "*"
 requests = "*"
 flower = "*"
+psycopg2-binary = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
