@@ -25,5 +25,5 @@ urlpatterns = [
     path('redoc', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # API v1
-    # path('newsletters/', include('src.newsletter.urls')),
+    path('newsletters/', include('src.newsletter.urls')),
 ]
