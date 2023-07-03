@@ -16,7 +16,6 @@ def send_message_to_client(dispatch_id, client_id):
         "phone": client.phone_number,
         "text": dispatch.text_message,
     }
-    # print(f'{url} \n {headers} \n {data}')
 
     try:
         response = requests.post(url, headers=headers, json=data)
@@ -27,7 +26,34 @@ def send_message_to_client(dispatch_id, client_id):
                 dispatch=dispatch,
                 client=client
             )
-
+        elif response.status_code == 401:
+            message = Message.objects.create(
+                status='F',
+                dispatch=dispatch,
+                client=client
+            )
+        elif response.status_code == 400 or response.elapsed.total_seconds() > 10:
+            # Повторная попытка отправки
+            try:
+                response_retry = requests.post(url, headers=headers, json=data)
+                if response_retry.status_code == 200:
+                    message = Message.objects.create(
+                        status='S',
+                        dispatch=dispatch,
+                        client=client
+                    )
+                else:
+                    message = Message.objects.create(
+                        status='F',
+                        dispatch=dispatch,
+                        client=client
+                    )
+            except requests.exceptions.RequestException:
+                message = Message.objects.create(
+                    status='F',
+                    dispatch=dispatch,
+                    client=client
+                )
         else:
             message = Message.objects.create(
                 status='F',
