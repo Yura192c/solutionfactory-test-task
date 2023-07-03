@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Статистика{% endblock %}
+{% load static %}
+{% block cssblock %}
+    <link rel="stylesheet" href={% static 'stats/css/statistics.css' %}>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <main>
+        <h5>Ваш аккаунт не имеет статуса "администратор" и не имеет доступа к этой странице </h5>
+
+
+    </main>
+{% endblock %}
+
+{% block jsblock %}
+{% endblock %}
