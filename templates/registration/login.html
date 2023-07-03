@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 {% block title %}Log-in{% endblock %}
 {% block content %}
-    <h1>Log-in</h1>
+    <h1>Вход</h1>
     {% if form.errors %}
         <p>
-            Your username and password didn't match.
-            Please try again.
+            Ваш username и password не подходят.
+            Пожалуйста попробуйте еще раз.
         </p>
     {% else %}
-        <p>Please, use the following form to log-in:</p>
+        <p>Пожалуйста, заполните данные:</p>
     {% endif %}
     <div class="login-form">
         <form action="{% url 'login' %}" method="post">
