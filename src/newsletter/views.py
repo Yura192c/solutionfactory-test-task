@@ -1,9 +1,9 @@
-from celery import shared_task
 from rest_framework import generics, permissions
 from .models import Message, Dispatch, Client
 from .serializers import MessageSerializer, DispatchSerializer, ClientSerializer, DispatchStatsSerializer
 from src.base.classes import CreateRetrieveUpdateDestroy as CRUD
 from src.newsletter.tasks import send_message_to_client
+from datetime import timedelta
 
 
 class ClientView(CRUD):
@@ -31,6 +31,9 @@ class DispatchView(CRUD):
         serializer.save()
         dispatch = serializer.instance
 
+        dispatch_time = dispatch.start_time
+        eta = dispatch_time - timedelta(hours=3)
+
         clients = []
         try:
             if 900 <= int(dispatch.client_filter) <= 997:
@@ -40,7 +43,7 @@ class DispatchView(CRUD):
 
         for client in clients:
             send_message_to_client.apply_async(args=[dispatch.id, client.id],
-                                               eta=dispatch.start_time)
+                                               eta=eta)
 
 
 class DispatchStatsView(generics.RetrieveAPIView):
