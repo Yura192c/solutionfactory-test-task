@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://kit.fontawesome.com/b8a24b2ae0.js" crossorigin="anonymous"></script>
+    <title>{% block title %}SolutionFactory{% endblock %}</title>
+    <link rel="stylesheet" href={% static 'stats/css/layout.css' %}>
+    {% block cssblock %}{% endblock %}
+</head>
+
+<body>
+<section id="sidebar">
+    <div class="white-label">
+    </div>
+    <div id="sidebar-nav">
+        <ul>
+            <li><a href="{% url 'schema-swagger-ui' %}"><i class="fa-solid fa-book"></i> Документация</a></li>
+            <li><a href="{% url 'schema-redoc' %}"><i class="fa-solid fa-book"></i> Redoc</a></li>
+            {% if request.user.is_authenticated %}
+            <li class="active"><a href="{% url 'stats:statistics' %}"><i class="fa fa-dashboard"></i> Статистика</a></li>
+            <li><a href="#"><i class="fa fa-pencil-square-o"></i> My Blog</a></li>
+            <li><a href="#"><i class="fa fa-sitemap"></i> SEO Tools</a></li>
+            <li><a href="#"><i class="fa fa-line-chart"></i> Reporting</a></li>
+            <li><a href="#"><i class="fa fa-comments-o"></i>Social Marketing</a></li>
+            <li><a href="#"><i class="fa fa-map-marker"></i> Get Traffic</a></li>
+            <li><a href="#"><i class="fa fa-users"></i> Employees</a></li>
+            <li><a href="#"><i class="fa fa-calendar-o"></i> Reservations</a></li>
+            <li><a href="#"><i class="fa fa-calendar"></i> Calendar</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</section>
+<section id="content">
+    <div id="header">
+        <div class="header-nav">
+            <div class="menu-button">
+                <!--<i class="fa fa-navicon"></i>-->
+            </div>
+            <div class="nav">
+                <ul>
+
+                    <li class="nav-profile">
+                        <div class="nav-profile-image">
+                            {% if request.user.is_authenticated %}
+                                <div class="nav-profile-name">Добро
+                                    пожаловать, {{ request.user.first_name|default:request.user.username }}
+                                </div>
+                            {% else %}
+                                <a href="{% url "login" %}">Войти</a>
+{#                                <a href="{% url "register" %}">Зарегистрироваться</a>#}
+                            {% endif %}
+                        </div>
+
+                    </li>
+                {% if request.user.is_authenticated %}
+                <li style="display: flex"><a href="{% url "logout" %}">Выйти</a></li>
+                {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+<div class="content">
+    {% block content %}
+    {% endblock %}
+</div>
+</section>
+
+
+
+<script>
+{% block jsblock %}
+{% endblock %}
+
+
+</script>
+</body>
+
+</html>

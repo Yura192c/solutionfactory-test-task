@@ -16,8 +16,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
 
+    # API
     'src.user',
     'src.newsletter',
+
+    # UI
+    'src.stats'
 ]
 
 MIDDLEWARE = [
@@ -80,7 +84,7 @@ LANGUAGE_CODE = 'Ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -99,7 +103,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user.CustomUser'
 
-
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
@@ -109,3 +112,7 @@ REST_FRAMEWORK = {
     ]
 }
 
+LOGIN_REDIRECT_URL = 'stats:statistics'
+LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
