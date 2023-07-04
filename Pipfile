@@ -12,6 +12,7 @@ requests = "*"
 flower = "*"
 psycopg2-binary = "*"
 psycopg2 = "*"
+django-celery-beat = "*"
 
 [dev-packages]
 
