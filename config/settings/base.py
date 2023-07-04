@@ -1,5 +1,7 @@
 import os
+from datetime import timedelta, time
 from pathlib import Path
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -15,6 +17,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'drf_yasg',
+    'django_celery_beat',
 
     # API
     'src.user',
@@ -112,7 +115,22 @@ REST_FRAMEWORK = {
     ]
 }
 
+CELERY_BEAT_SCHEDULE = {
+    'send-statistics-email': {
+        'task': 'src.stats.tasks.send_statistics_email',
+        'schedule': crontab(hour=1, minute=00),  # Здесь указывается желаемое время отправки
+    },
+}
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+# User login settings
 LOGIN_REDIRECT_URL = 'stats:statistics'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
+
+# Email settings
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

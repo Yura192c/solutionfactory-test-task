@@ -19,3 +19,14 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 ALLOWED_HOSTS = []
+
+# API settings
+API_SENDING_URL = 'https://probe.fbrq.cloud/v1/send/'
+API_JWT_TOKEN = os.environ['API_JWT_TOKEN']
+
+# Email settins
+EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+# Адреса электронной почты
+STATISTICS_EMAIL_RECIPIENTS = os.environ.get('STATISTICS_EMAIL_RECIPIENTS', '').split(
+    ',')  # Укажите список получателей статистики
