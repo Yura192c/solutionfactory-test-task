@@ -10,22 +10,9 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class DispatchSerializer(serializers.ModelSerializer):
-    # clients = serializers.SerializerMethodField()
-
     class Meta:
         model = Dispatch
-        # fields = '__all__'
         fields = ('id', 'start_time', 'end_time', 'text_message', 'client_filter')
-
-    # def get_clients(self, instance):
-    #     # Логика для получения списка клиентов в рассылке
-    #     clients = []
-    #     try:
-    #         if 990 <= int(instance.client_filter) <= 997:
-    #             clients = Client.objects.filter(mobile_operator_code=int(instance.client_filter))
-    #     except ValueError:
-    #         clients = Client.objects.filter(tag__contains=instance.client_filter)
-    #     return ClientSerializer(clients, many=True).data
 
 
 class DispatchStatsSerializer(serializers.ModelSerializer):
