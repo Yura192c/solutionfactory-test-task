@@ -21,7 +21,7 @@ class DispatchView(CRUD):
     ''' CRUD dispatch '''
     queryset = Dispatch.objects.all()
     serializer_class = DispatchSerializer
-    permission_classes_by_action = {'create': [permissions.IsAdminUser],
+    permission_classes_by_action = {'create': [permissions.IsAuthenticated],
                                     'list': [permissions.IsAdminUser],
                                     'retrieve': [permissions.IsAdminUser],
                                     'update': [permissions.IsAdminUser],
@@ -47,8 +47,10 @@ class DispatchView(CRUD):
 
 
 class DispatchStatsView(generics.RetrieveAPIView):
+    ''' Get stats for a specific dispatch '''
     queryset = Dispatch.objects.all()
     serializer_class = DispatchStatsSerializer
+    permission_classes = [permissions.IsAdminUser]
 
 
 class MessageView(generics.ListAPIView):
@@ -59,9 +61,3 @@ class MessageView(generics.ListAPIView):
     def get_queryset(self):
         dispatch_id = self.kwargs['dispatch_id']
         return Message.objects.filter(dispatch_id=dispatch_id)
-
-    def post(self, request, *args, **kwargs):
-        dispatch_id = self.kwargs['dispatch_id']
-        dispatch = Dispatch.objects.get(id=dispatch_id)
-        dispatch.send()
-        return self.list(request, *args, **kwargs)
