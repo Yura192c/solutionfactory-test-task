@@ -20,6 +20,15 @@ python manage.py runserver
 ```
 celery -A config worker -l info
 ```
+### Запуск Celery Beat
+```
+celery -A config beat -l info
+```
+***Важно!*** Для корректной работы Celery Beat необходимо запустить Celery Worker
+***Celery и Celery Beat можно запустить одной командой:***
+```
+celery -A config worker --beat --loglevel=info
+```
 ### Запуск Flower
 Flower - это веб-интерфейс для мониторинга и управления задачами Celery. Его запуск необязателен.
 Доступен по адресу http://127.0.0.1:5555/
@@ -45,3 +54,9 @@ docker-compose up --build
 <br>http://127.0.0.1:8000/redoc
 ### Авторизация
 Для авторизации используется админ аккаунт Django с параметрами username и password.
+Аккаунт администратора можно создать через консоль командой
+```
+python manage.py createsuperuser
+```
+Аккаунт пользователя можно создать через Web интерфейс статистики по адресу: 
+<br>http://127.0.0.1:8000/account/register/
