@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta, time
 from pathlib import Path
 from celery.schedules import crontab
 
@@ -18,6 +17,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'django_celery_beat',
+    'django_celery_results',
 
     # API
     'src.user',
@@ -129,8 +129,17 @@ LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 
+# API settings
+API_SENDING_URL = 'https://probe.fbrq.cloud/v1/send/'
+API_JWT_TOKEN = os.environ.get("API_JWT_TOKEN")
+
+# Email settins
 # Email settings
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+# Адреса электронной почты
+STATISTICS_EMAIL_RECIPIENTS = os.environ.get('STATISTICS_EMAIL_RECIPIENTS', '').split(',')
