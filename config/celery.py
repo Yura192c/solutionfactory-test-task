@@ -3,8 +3,9 @@ from celery import Celery
 import django_celery_results
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.development')
-app = Celery('config',)
-             # broker='amqp://rabbitmq:rabbitmq@test:5672',)
+app = Celery('config',
+             # broker='amqp://rabbitmq:rabbitmq@test:5672',
+             )
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 app.conf.result_backend = 'django-db'
