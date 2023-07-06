@@ -1,6 +1,8 @@
+import os
+
 from celery import shared_task
 from src.newsletter.models import Dispatch, Client, Message
-from config.settings.development import API_SENDING_URL, API_JWT_TOKEN
+from django.conf import settings
 import requests
 
 
@@ -9,8 +11,8 @@ def send_message_to_client(dispatch_id, client_id):
     dispatch = Dispatch.objects.get(id=dispatch_id)
     client = Client.objects.get(id=client_id)
 
-    url = f"{API_SENDING_URL}{client.id}"
-    headers = {"Authorization": f"{API_JWT_TOKEN}"}
+    url = f"{settings.API_SENDING_URL}{client.id}"
+    headers = {"Authorization": f"{settings.API_JWT_TOKEN}"}
     data = {
         "id": client.id,
         "phone": client.phone_number,
