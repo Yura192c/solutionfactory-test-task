@@ -18,9 +18,6 @@ COPY . /solutionfactory-test-task/
 RUN #python manage.py migrate
 RUN python manage.py collectstatic --no-input
 
-# copy entrypoint.sh
-COPY ./entrypoint.sh /entrypoint.sh
 # copy project
 COPY . .
-# run entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+
