@@ -15,6 +15,7 @@ psycopg2 = "*"
 django-celery-beat = "*"
 sqlalchemy = "*"
 django-celery-results = "*"
+redis = "*"
 
 [dev-packages]
 

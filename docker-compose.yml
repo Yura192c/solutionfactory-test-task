@@ -25,6 +25,18 @@ services:
       - 15672:15672
       - 5672:5672
 
+  redis:
+      image: redis:3.2.8
+      hostname: redis
+      environment:
+        - REDIS_USER="redis"
+        - REDIS_PASSWORD="redis"
+        - REDIS_HOST="redis"
+        - ALLOW_EMPTY_PASSWORD=yes
+      command:
+        --requirepass redis
+      ports:
+        - 6379:6379
 
   web:
     build: .
@@ -40,6 +52,7 @@ services:
       - "rabbitmq:test"
 #      - db
       - rabbitmq
+      - redis
     depends_on:
       - db
 
@@ -54,6 +67,7 @@ services:
       - "rabbitmq:test"
       - web
       - db
+      - redis
     depends_on:
       - rabbitmq
 
@@ -65,7 +79,12 @@ services:
       - 5555:5555
     links:
       - "rabbitmq:test"
+      - web
+      - db
+      - redis
+      - celery-worker
     depends_on:
+      - celery-worker
       - rabbitmq
 
 volumes:
