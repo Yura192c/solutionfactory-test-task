@@ -16,9 +16,19 @@ class Client(models.Model):
     )
     # Все российские операторы имеют код от 900 до 997, в тз не указано нужны именно российские операторы или нет
     # поэтому я ограничился этими кодами
-    mobile_operator_code = models.IntegerField(validators=[MinValueValidator(900), MaxValueValidator(997)])
+    mobile_operator_code = models.IntegerField(
+        validators=[MinValueValidator(900), MaxValueValidator(997)])
     tag = models.CharField(max_length=100)
     timezone = models.CharField(max_length=255)
+
+
+class ClientFilters(models.IntegerChoices):
+    '''
+    Client filters for dispatch
+    '''
+
+    TAG_FILTER = 1, 'Tag filter'
+    MOBILE_OPERATOR_CODE_FILTER = 2, 'Mobile operator code filter'
 
 
 class Dispatch(models.Model):
@@ -26,14 +36,39 @@ class Dispatch(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     text_message = models.TextField()
-    client_filter = models.CharField(max_length=100)
+    client_filter = models.IntegerField(choices=ClientFilters.choices, null=True)
+    client_filter_tag = models.CharField(max_length=100, blank=True, null=True)
+    client_filter_mobile_operator_code = models.IntegerField(blank=True, null=True,
+                                                             validators=[MinValueValidator(900),
+                                                                         MaxValueValidator(997)])
+
+    class Meta:
+        ordering = ['start_time']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(start_time__lt=models.F('end_time')),
+                name='start_time_before_end_time'
+            ),
+            models.CheckConstraint(
+                name='dispatch_client_filter_check',
+                check=
+                (models.Q(
+                    client_filter=ClientFilters.TAG_FILTER,
+                    client_filter_tag__isnull=False,
+                    client_filter_mobile_operator_code__isnull=True) |
+                 models.Q(
+                     client_filter=ClientFilters.MOBILE_OPERATOR_CODE_FILTER,
+                     client_filter_tag__isnull=True,
+                     client_filter_mobile_operator_code__isnull=False)), )
+        ]
 
     def send(self):
         from .tasks import send_message_to_client
         clients = []
         try:
             if 900 <= int(self.client_filter) <= 997:
-                clients = Client.objects.filter(mobile_operator_code=int(self.client_filter))
+                clients = Client.objects.filter(
+                    mobile_operator_code=int(self.client_filter))
         except ValueError:
             clients = Client.objects.filter(tag__contains=self.client_filter)
         for client in clients:
