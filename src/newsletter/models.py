@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
+from django.db import models
 from django.utils import timezone
 
 
@@ -10,9 +10,9 @@ class Client(models.Model):
         validators=[
             RegexValidator(
                 regex=r'^7[0-9]{10}$',
-                message='Phone number must be in the format 7XXXXXXXXXX'
-            )
-        ]
+                message='Phone number must be in the format 7XXXXXXXXXX',
+            ),
+        ],
     )
     # Все российские операторы имеют код от 900 до 997, в тз не указано нужны именно российские операторы или нет
     # поэтому я ограничился этими кодами
@@ -47,7 +47,7 @@ class Dispatch(models.Model):
         constraints = [
             models.CheckConstraint(
                 check=models.Q(start_time__lt=models.F('end_time')),
-                name='start_time_before_end_time'
+                name='start_time_before_end_time',
             ),
             models.CheckConstraint(
                 name='dispatch_client_filter_check',
@@ -59,30 +59,38 @@ class Dispatch(models.Model):
                  models.Q(
                      client_filter=ClientFilters.MOBILE_OPERATOR_CODE_FILTER,
                      client_filter_tag__isnull=True,
-                     client_filter_mobile_operator_code__isnull=False)), )
+                     client_filter_mobile_operator_code__isnull=False))),
         ]
 
     def send(self):
         from .tasks import send_message_to_client
-        clients = []
-        try:
-            if 900 <= int(self.client_filter) <= 997:
-                clients = Client.objects.filter(
-                    mobile_operator_code=int(self.client_filter))
-        except ValueError:
-            clients = Client.objects.filter(tag__contains=self.client_filter)
+        from .services import get_clients_list_in_dispatch
+        clients = get_clients_list_in_dispatch(dispatch=self)
         for client in clients:
             send_message_to_client.delay(self.id, client.id)
 
 
+class MessageStatus(models.TextChoices):
+    SENT = 'S', 'Sent'
+    FAILED = 'F', 'Failed'
+    PENDING = 'P', 'Pending'
+
+
 class Message(models.Model):
-    STATUS_CHOICES = [
-        ('S', 'Sent'),
-        ('F', 'Failed'),
-        ('P', 'Pending'),
-    ]
     id = models.AutoField(primary_key=True)
-    creation_time = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=255, db_index=True, choices=MessageStatus.choices,
+                              default=MessageStatus.PENDING)
     dispatch = models.ForeignKey(Dispatch, on_delete=models.CASCADE)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
+
+    creation_time = models.DateTimeField(default=timezone.now)
+    sending_time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['creation_time', 'sending_time']
+        constraints = [
+            models.CheckConstraint(
+                name='sending_time_with_status_sent',
+                check=models.Q(status=MessageStatus.SENT) | models.Q(sending_time__isnull=True),
+            ),
+        ]
