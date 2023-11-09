@@ -18,6 +18,15 @@ django-celery-results = "*"
 redis = "*"
 
 [dev-packages]
+flake8 = "*"
+autopep8 = "*"
+django-debug-toolbar = "*"
+flake8-bugbear = "*"
+flake8-builtins = "*"
+pep8-naming = "*"
+flake8-commas = "*"
+flake8-variables-names = "*"
+flake8-import-order = "*"
 
 [requires]
 python_version = "3.11"
