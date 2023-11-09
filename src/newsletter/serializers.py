@@ -1,6 +1,9 @@
 from django.utils import timezone
+
 from rest_framework import serializers
-from .models import Message, Dispatch, Client
+
+from .models import Client, Dispatch, Message
+from .services import get_clients_list_in_dispatch
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -12,7 +15,8 @@ class ClientSerializer(serializers.ModelSerializer):
 class DispatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dispatch
-        fields = ('id', 'start_time', 'end_time', 'text_message', 'client_filter')
+        fields = ('id', 'start_time', 'end_time', 'text_message', 'client_filter',
+                  'client_filter_tag', 'client_filter_mobile_operator_code')
 
 
 class DispatchStatsSerializer(serializers.ModelSerializer):
@@ -24,17 +28,13 @@ class DispatchStatsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dispatch
-        fields = ('id', 'clients', 'successful_messages', 'failed_messages',
-                  'pending', 'errors', 'text_message')
+        # fields = ('id', 'clients', 'successful_messages', 'failed_messages',
+        #           'pending', 'errors', 'text_message')
+        fields = '__all__'
 
     def get_clients(self, instance):
         # Логика для получения списка клиентов в рассылке
-        clients = []
-        try:
-            if 900 <= int(instance.client_filter) <= 997:
-                clients = Client.objects.filter(mobile_operator_code=int(instance.client_filter))
-        except ValueError:
-            clients = Client.objects.filter(tag__contains=instance.client_filter)
+        clients = get_clients_list_in_dispatch()
         return ClientSerializer(clients, many=True).data
 
     def get_successful_messages(self, instance):
@@ -57,7 +57,7 @@ class DispatchStatsSerializer(serializers.ModelSerializer):
         message = Message.objects.filter(dispatch=instance).first()
         return message.text_message if message else ''
 
-    def get_pending(selfself, instance):
+    def get_pending(self, instance):
         current_time = timezone.now()
         return current_time < instance.start_time
 

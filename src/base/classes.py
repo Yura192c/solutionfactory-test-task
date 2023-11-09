@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, mixins, decorators, viewsets
+from rest_framework import mixins, viewsets
 
 
 class MixedPermission:

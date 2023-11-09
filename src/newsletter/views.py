@@ -1,13 +1,17 @@
+from datetime import timedelta
+
 from rest_framework import generics, permissions
-from .models import Message, Dispatch, Client
-from .serializers import MessageSerializer, DispatchSerializer, ClientSerializer, DispatchStatsSerializer
+
 from src.base.classes import CreateRetrieveUpdateDestroy as CRUD
 from src.newsletter.tasks import send_message_to_client
-from datetime import timedelta
+
+from .models import Client, Dispatch, Message
+from .serializers import ClientSerializer, DispatchSerializer, DispatchStatsSerializer, MessageSerializer
+from .services import get_clients_list_in_dispatch
 
 
 class ClientView(CRUD):
-    ''' CRUD client '''
+    """ CRUD client """
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     permission_classes_by_action = {'create': [permissions.AllowAny],
@@ -18,7 +22,7 @@ class ClientView(CRUD):
 
 
 class DispatchView(CRUD):
-    ''' CRUD dispatch '''
+    """ CRUD dispatch """
     queryset = Dispatch.objects.all()
     serializer_class = DispatchSerializer
     permission_classes_by_action = {'create': [permissions.IsAuthenticated],
@@ -34,12 +38,7 @@ class DispatchView(CRUD):
         dispatch_time = dispatch.start_time
         eta = dispatch_time - timedelta(hours=3)
 
-        clients = []
-        try:
-            if 900 <= int(dispatch.client_filter) <= 997:
-                clients = Client.objects.filter(mobile_operator_code=int(dispatch.client_filter))
-        except ValueError:
-            clients = Client.objects.filter(tag__contains=dispatch.client_filter)
+        clients = get_clients_list_in_dispatch(dispatch=dispatch)
 
         for client in clients:
             send_message_to_client.apply_async(args=[dispatch.id, client.id],
@@ -47,14 +46,14 @@ class DispatchView(CRUD):
 
 
 class DispatchStatsView(generics.RetrieveAPIView):
-    ''' Get stats for a specific dispatch '''
+    """ Get stats for a specific dispatch """
     queryset = Dispatch.objects.all()
     serializer_class = DispatchStatsSerializer
     permission_classes = [permissions.IsAdminUser]
 
 
 class MessageView(generics.ListAPIView):
-    ''' List messages for a specific dispatch '''
+    """ List messages for a specific dispatch """
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAdminUser]
 

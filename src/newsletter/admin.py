@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import Client, Dispatch, Message
+from .services import get_clients_list_in_dispatch
 
 
 @admin.register(Client)
@@ -14,20 +16,22 @@ class DispatchAdmin(admin.ModelAdmin):
     """ Рассылки
     """
 
-    list_display = ('id', 'start_time', 'end_time', 'text_message', 'client_filter', 'clients_count')
+    list_display = ('id', 'start_time', 'end_time', 'text_message', 'client_filter', 'client_filter_tag',
+                    'client_filter_mobile_operator_code', 'get_clients_count')
 
-    def clients_count(self, obj):
-        clients = 0
-        try:
-            if 900 <= int(obj.client_filter) <= 997:
-                clients = Client.objects.filter(mobile_operator_code=int(obj.client_filter))
-        except:
-            clients = Client.objects.filter(tag__contains=obj.client_filter)
-        return clients.count()
+    fieldsets = (
+        ('Base Information', {
+            'fields': ('start_time', 'end_time', 'text_message', 'client_filter', 'client_filter_tag',
+                       'client_filter_mobile_operator_code'),
+        }),
+    )
+
+    def get_clients_count(self, obj):
+        return get_clients_list_in_dispatch(dispatch=obj).count()
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     """ Сообщения
     """
-    list_display = ('id', 'creation_time', 'status', 'dispatch', 'client')
+    list_display = ('id', 'status', 'dispatch', 'client', 'creation_time', 'sending_time')

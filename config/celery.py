@@ -1,4 +1,5 @@
 import os
+
 from celery import Celery
 
 # import django_celery_results
